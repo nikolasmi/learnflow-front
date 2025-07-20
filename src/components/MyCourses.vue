@@ -26,12 +26,18 @@
           >
             Izmeni kurs
           </button>
-          <RouterLink
-            to="/"
+          <button
+            @click="$emit('openEditThumbnailModal', course)"
+            class="w-full px-3 py-1 rounded bg-yellow-500 text-white hover:bg-yellow-600 transition"
+            >
+            Izmeni thumbnail
+            </button>
+          <button
+            @click="$emit('openCourseLessons', course)"
             class="w-full text-center px-3 py-1 rounded bg-green-600 text-white hover:bg-green-700 transition"
           >
             Lekcije
-          </RouterLink>
+          </button>
           <button
             @click="$emit('deleteCourse', course.courseId)"
             class="w-full px-3 py-1 rounded bg-red-600 text-white hover:bg-red-700 transition"
@@ -53,7 +59,7 @@ defineProps<{
   courses: CreatedCourse[] | undefined
 }>()
 
-defineEmits(['openCreateModal', 'openEditModal', 'deleteCourse'])
+defineEmits(['openCreateModal', 'openEditModal', 'openEditThumbnailModal', 'deleteCourse', 'openCourseLessons'])
 
 const formatDate = (dateStr: string) => {
   const date = new Date(dateStr)

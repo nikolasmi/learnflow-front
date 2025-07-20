@@ -12,13 +12,12 @@
         <div
           v-for="lesson in course.lessons"
           :key="lesson.lessonId"
-          class="p-4 border border-gray-300 rounded-xl shadow hover:shadow-md cursor-pointer bg-white transition flex justify-between items-center"
-          @click="goToLesson(lesson.lessonId)"
+          class="p-4 border border-gray-300 rounded-xl shadow bg-white flex justify-between items-center cursor-pointer hover:bg-gray-100 transition"
+          @click="showPurchaseWarning"
         >
           <h3 class="text-xl font-semibold text-gray-800">
             #{{ lesson.orderNumber }} - {{ lesson.title }}
           </h3>
-          <span class="text-2xl text-gray-400 group-hover:text-gray-600 transition">→</span>
         </div>
       </div>
     </section>
@@ -31,18 +30,17 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import axios from 'axios'
-import { useRoute, useRouter } from 'vue-router'
+import { useRoute } from 'vue-router'
 import { toast } from 'vue3-toastify'
 import type { Course } from '@/types/Course'
 import CourseComments from '@/components/CourseComments.vue'
 
 const route = useRoute()
-const router = useRouter()
 const courseId = Number(route.params.id)
 const course = ref<Course | null>(null)
 const loading = ref(false)
 
-const fetchLessons = async () => {
+const fetchCourse = async () => {
   try {
     loading.value = true
     const response = await axios.get(`http://localhost:3000/api/course/${courseId}`)
@@ -54,10 +52,10 @@ const fetchLessons = async () => {
   }
 }
 
-fetchLessons()
+fetchCourse()
 
-const goToLesson = (lessonId: number) => {
-  router.push({ path: `/lessons/${lessonId}` })
+const showPurchaseWarning = () => {
+  toast.warning('Morate kupiti kurs da biste mogli da gledate lekcije.')
 }
 </script>
 

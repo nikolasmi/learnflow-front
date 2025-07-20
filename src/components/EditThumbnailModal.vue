@@ -1,155 +1,113 @@
 <template>
-  <Modal :isOpen="isOpen" @close="closeModal">
-    <template #header>
-      <h2 class="text-xl font-bold">Izmeni Thumbnail</h2>
-    </template>
+  <div class="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-50">
+    <div class="bg-white rounded-lg p-6 w-full max-w-md relative">
+      <h2 class="text-xl font-semibold mb-4">Izmeni thumbnail za: {{ course.title }}</h2>
 
-    <template #body>
-      <div class="flex flex-col items-center gap-4">
-        <div class="relative w-full h-48 bg-gray-100 rounded-lg overflow-hidden">
-          <img
-            :src="thumbnailPreview || currentThumbnail || '/default-video.webp'"
-            class="w-full h-full object-cover"
-            alt="Thumbnail preview"
-          />
-        </div>
-
-        <input
-          type="file"
-          ref="fileInput"
-          accept="image/*"
-          @change="handleFileChange"
-          class="hidden"
+      <div v-if="course.thumbnailUrl" class="mb-4">
+        <p class="text-sm text-gray-600 mb-2">Trenutni thumbnail:</p>
+        <img
+          :src="`http://localhost:3000/assets/thumbnails/${course.thumbnailUrl.imagePath}`"
+          alt="Thumbnail"
+          class="w-full h-40 object-cover rounded"
         />
-        <button
-          type="button"
-          @click="fileInput?.click()"
-          class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
-        >
-          {{ thumbnailPreview ? 'Izaberi drugu sliku' : 'Izaberi sliku' }}
-        </button>
+      </div>
+      <p>Odaberi fajl</p>
+      <input type="file" accept="image/*" @change="handleFileChange" />
 
+      <div class="mt-4 flex justify-end gap-2">
         <button
-          v-if="thumbnailPreview || currentThumbnail"
-          type="button"
-          @click="removeThumbnail"
-          class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition"
+          class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
+          @click="$emit('close')"
         >
-          Ukloni thumbnail
+          Otkaži
+        </button>
+        <button
+          class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+          :disabled="!course.thumbnailUrl"
+          @click="deleteThumbnail"
+          title="Obriši postojeći thumbnail"
+        >
+          Obriši thumbnail
+        </button>
+        <button
+          class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+          :disabled="!selectedFile"
+          @click="uploadThumbnail"
+        >
+          Sačuvaj
         </button>
       </div>
-    </template>
-
-    <template #footer>
-      <button
-        type="button"
-        @click="closeModal"
-        class="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300 transition mr-3"
-      >
-        Otkaži
-      </button>
-      <button
-        type="button"
-        @click="saveThumbnail"
-        :disabled="!hasChanges || isSaving"
-        class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition disabled:opacity-50"
-      >
-        <span v-if="isSaving">Čuvanje...</span>
-        <span v-else>Sačuvaj</span>
-      </button>
-    </template>
-  </Modal>
+    </div>
+  </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref } from 'vue'
 import axios from 'axios'
 import { toast } from 'vue3-toastify'
 
-const props = defineProps({
-  isOpen: Boolean,
-  courseId: {
-    type: Number,
-    required: true
-  },
-  currentThumbnail: String
-})
+const props = defineProps<{
+  course: {
+    courseId: number
+    title: string
+    thumbnailUrl: {
+      thumbnailId: number
+      courseId: number
+      imagePath: string
+    } | null
+  }
+}>()
 
 const emit = defineEmits(['close', 'updated'])
-
-interface Refs {
-  fileInput: HTMLInputElement
-}
-
-const fileInput = ref<HTMLInputElement | null>(null)
-const thumbnailPreview = ref<string | null>(null)
 const selectedFile = ref<File | null>(null)
-const isSaving = ref(false)
-
-const hasChanges = computed(() => {
-  return selectedFile.value !== null || thumbnailPreview.value === null
-})
 
 const handleFileChange = (e: Event) => {
-  const input = e.target as HTMLInputElement
-  if (input.files && input.files[0]) {
-    selectedFile.value = input.files[0]
-    const reader = new FileReader()
-    reader.onload = (e) => {
-      thumbnailPreview.value = e.target?.result as string
-    }
-    reader.readAsDataURL(input.files[0])
+  const target = e.target as HTMLInputElement
+  if (target.files && target.files[0]) {
+    selectedFile.value = target.files[0]
   }
 }
 
-const removeThumbnail = () => {
-  selectedFile.value = null
-  thumbnailPreview.value = null
-  if (fileInput.value) {
-    fileInput.value.value = ''
-  }
-}
+const uploadThumbnail = async () => {
+  if (!selectedFile.value) return
 
-const closeModal = () => {
-  // Resetujemo izmene prilikom zatvaranja
-  thumbnailPreview.value = null
-  selectedFile.value = null
-  emit('close')
-}
-
-const saveThumbnail = async () => {
-  if (!hasChanges.value) return
-
-  isSaving.value = true
+  const formData = new FormData()
+  formData.append('thumbnail', selectedFile.value)
 
   try {
-    if (selectedFile.value) {
-      // Upload novog thumbnaila
-      const formData = new FormData()
-      formData.append('thumbnail', selectedFile.value)
-      
-      await axios.post(
-        `http://localhost:3000/api/course/${props.courseId}/upload-thumbnail`, 
-        formData,
-        {
-          headers: {
-            'Content-Type': 'multipart/form-data'
-          }
-        }
+    // Prvo obriši stari thumbnail ako postoji
+    if (props.course.thumbnailUrl) {
+      await axios.delete(
+        `http://localhost:3000/api/course/${props.course.courseId}/deleteThumbnail/${props.course.thumbnailUrl.thumbnailId}`
       )
-    } else if (thumbnailPreview.value === null) {
-      // Brisanje thumbnaila
-      await axios.delete(`http://localhost:3000/api/course/${props.courseId}/thumbnail`)
     }
 
-    toast.success('Thumbnail je uspešno ažuriran')
+    // Zatim uploaduj novi
+    await axios.post(
+      `http://localhost:3000/api/course/${props.course.courseId}/upload-thumbnail`,
+      formData
+    )
+
+    toast.success('Thumbnail je uspešno izmenjen.')
     emit('updated')
-    closeModal()
+    emit('close')
   } catch (error) {
-    toast.error('Došlo je do greške prilikom ažuriranja thumbnaila')
-    console.error(error)
-  } finally {
-    isSaving.value = false
+    toast.error('Greška pri promeni thumbnail slike.')
+  }
+}
+
+const deleteThumbnail = async () => {
+  if (!props.course.thumbnailUrl) return
+
+  try {
+    await axios.delete(
+      `http://localhost:3000/api/course/${props.course.courseId}/deleteThumbnail/${props.course.thumbnailUrl.thumbnailId}`
+    )
+    toast.success('Thumbnail je uspešno obrisan.')
+    emit('updated')
+    emit('close')
+  } catch (error) {
+    toast.error('Greška pri brisanju thumbnail slike.')
   }
 }
 </script>

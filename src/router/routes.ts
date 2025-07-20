@@ -54,6 +54,13 @@ const mainRoutes: RouteRecordRaw[] = [
     meta: { layout: Default, requiresAuth: false }
   },
   {
+    component: () => import('../views/CoursePreview.vue'),
+    path: '/courses/:id/lessons/preview',
+    name: 'course-preview',
+    alias: '/courses/:id/lessons/preview',
+    meta: { layout: Default, requiresAuth: false }
+  },
+  {
     component: () => import('../views/SingleLesson.vue'),
     path: '/lessons/:id',
     name: 'single-lesson',
@@ -65,7 +72,7 @@ const mainRoutes: RouteRecordRaw[] = [
     path: '/user-dashboard/:id',
     name: 'user-dashboard',
     alias: "/user-dashboard/:id",
-    meta: { layout: Default, requiresAuth: false }
+    meta: { layout: Default, requiresAuth: true }
   },
 ]
 

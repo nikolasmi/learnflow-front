@@ -9,6 +9,8 @@
       @openCreateModal="isCreateModalOpen = true"
       @openEditModal="openEditModal"
       @deleteCourse="deleteCourse"
+      @openEditThumbnailModal="openEditThumbnailModal"
+      @openCourseLessons="openCourseLessons"
     />
 
     <CreateCourseModal
@@ -23,6 +25,20 @@
       @close="isEditModalOpen = false"
       @updated="fetchDashboard"
     />
+
+    <EditThumbnailModal
+      v-if="isEditThumbnailModalOpen && selectedCourseForThumbnail !== null"
+      :course="selectedCourseForThumbnail"
+      @close="isEditThumbnailModalOpen = false"
+      @updated="fetchDashboard"
+    />
+
+    <CourseLessonsModal
+      v-if="isLessonsModalOpen && selectedCourseForLessons"
+      :course="selectedCourseForLessons"
+      @close="isLessonsModalOpen = false"
+      @deleteLesson="handleDeleteLesson"
+    />
   </div>
 </template>
 
@@ -36,7 +52,9 @@ import RecentPurchase from '@/components/RecentPurchase.vue'
 import MyCourses from '@/components/MyCourses.vue'
 import CreateCourseModal from '@/components/CreateCourseModal.vue'
 import EditCourseModal from '@/components/EditCourseModal.vue'
+import EditThumbnailModal from '@/components/EditThumbnailModal.vue'
 import type { DashboardData } from '@/types/DashboardData'
+import CourseLessonsModal from '@/components/CourseLessonsModal.vue'
 
 const dashboard = ref<DashboardData | null>(null)
 const userStore = useUserStore()
@@ -44,7 +62,20 @@ const userId = userStore.user?.id
 
 const isCreateModalOpen = ref(false)
 const isEditModalOpen = ref(false)
+const isEditThumbnailModalOpen = ref(false)
+const isLessonsModalOpen = ref(false)
+
+const selectedCourseForLessons = ref<{ courseId: number; title: string } | null>(null)
 const selectedCourse = ref<any>(null)
+const selectedCourseForThumbnail = ref<{
+  courseId: number
+  title: string
+  thumbnailUrl: {
+    thumbnailId: number
+    courseId: number
+    imagePath: string
+  } | null
+} | null>(null)
 
 const fetchDashboard = async () => {
   try {
@@ -56,6 +87,7 @@ const fetchDashboard = async () => {
 }
 
 const deleteCourse = async (courseId: number) => {
+  if (!confirm('Da li ste sigurni da zelite da obrisete ovaj kurs?')) return;
   try {
     await axios.delete(`http://localhost:3000/api/course/${courseId}`)
     toast.success('Kurs je uspešno obrisan')
@@ -65,6 +97,19 @@ const deleteCourse = async (courseId: number) => {
   }
 }
 
+const openEditThumbnailModal = (course: {
+  courseId: number
+  title: string
+  thumbnailUrl: {
+    thumbnailId: number
+    courseId: number
+    imagePath: string
+  } | null
+}) => {
+  selectedCourseForThumbnail.value = course
+  isEditThumbnailModalOpen.value = true
+}
+
 const openEditModal = (course: any) => {
   selectedCourse.value = {
     courseId: course.courseId,
@@ -72,10 +117,32 @@ const openEditModal = (course: any) => {
     shortDescription: course.shortDescription ?? '',
     description: course.description ?? '',
     price: course.price ?? '0.00',
-    categoryId: course.categoryId ?? 1,
+    categoryId: course.categoryId ?? 0,
     userId: userId,
   }
   isEditModalOpen.value = true
+}
+
+const openCourseLessons = (course: { courseId: number; title: string }) => {
+  selectedCourseForLessons.value = { courseId: course.courseId, title: course.title }
+  isLessonsModalOpen.value = true
+}
+
+const handleDeleteLesson = async (lessonId: number) => {
+  if (!confirm('Da li ste sigurni da zelite da obrisete ovu lekciju?')) return;
+  try {
+    if (!selectedCourseForLessons.value?.courseId) return
+    await axios.delete(
+      `http://localhost:3000/api/lesson/course/${selectedCourseForLessons.value.courseId}/delete-lesson/${lessonId}`
+    )
+    toast.success('Lekcija je uspešno obrisana.')
+    isLessonsModalOpen.value = false
+    setTimeout(() => {
+      isLessonsModalOpen.value = true
+    }, 100)
+  } catch (error) {
+    toast.error('Greška prilikom brisanja lekcije.')
+  }
 }
 
 fetchDashboard()
