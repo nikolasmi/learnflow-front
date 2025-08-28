@@ -2,15 +2,18 @@
   <div class="flex p-4 shadow-sm justify-between items-center relative bg-secondary">
     <div class="flex items-center gap-x-4 z-10">
       <IconBurgerMenu class="fill-white cursor-pointer" />
-      <p class="font-semibold text-white">{{ pageName }}</p>
+      <p class="font-semibold text-dark dark:text-white">{{ pageName }}</p>
     </div>
     <RouterLink to="/" class="absolute left-1/2 transform -translate-x-1/2 z-0">
       <!-- <img alt="princip-logo" src="/learnflow-logo.png" class="h-8" /> -->
-       <h1 class="text-xl md:text-5xl font-extrabold tracking-wide text-[#222b36] font-logo">LEARNFLOW</h1>
+       <h1 class="text-xl md:text-5xl font-extrabold tracking-wide text-[#222b36] dark:text-white font-logo">LEARNFLOW</h1>
     </RouterLink>
     <div class="flex items-center gap-x-4 z-10">
-      <IconDarkMode class="fill-white cursor-pointer" @click="themeStore.setDarkMode" v-if="themeStore.theme !== 'dark'" />
-      <IconLightMode class="fill-white cursor-pointer" @click="themeStore.setLightMode" v-else />
+      <RouterLink to="/terms-of-service">
+        <IconBook class="fill-black cursor-pointer"></IconBook>
+      </RouterLink>
+      <!-- <IconDarkMode class="fill-white cursor-pointer" @click="themeStore.setDarkMode" v-if="themeStore.theme !== 'dark'" /> -->
+      <!-- <IconLightMode class="fill-white cursor-pointer" @click="themeStore.setLightMode" v-else /> -->
       <RouterLink :to="`/user-dashboard/${userId}`">
         <IconStats class="fill-white dark:fill-white cursor-pointer" />
       </RouterLink>
@@ -36,6 +39,7 @@ import ProfileDropdownConent from '../components/profileDropdown.vue'
 import { useUserStore } from '@/stores/user'
 import { useThemeStore } from '../stores/theme'
 import IconStats from './icons/IconStats.vue'
+import IconBook from './icons/IconBook.vue'
 
 const route = useRoute()
 const userStore = useUserStore()

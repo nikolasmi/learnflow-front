@@ -4,7 +4,8 @@
 
     <DashboardStats :stats="dashboard" />
     <RecentPurchase :purchases="dashboard?.recentPurchases" />
-    <MyCourses 
+    <UserWishlist :courses="userWishlist" @wishlistUpdated="fetchUserWishlist" />
+    <MyCourses
       :courses="dashboard?.ownCourses"
       @openCreateModal="isCreateModalOpen = true"
       @openEditModal="openEditModal"
@@ -43,12 +44,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import axios from 'axios'
 import { toast } from 'vue3-toastify'
 import { useUserStore } from '@/stores/user'
 import DashboardStats from '@/components/DashboardStats.vue'
 import RecentPurchase from '@/components/RecentPurchase.vue'
+import UserWishlist from '@/components/UserWishlist.vue'
 import MyCourses from '@/components/MyCourses.vue'
 import CreateCourseModal from '@/components/CreateCourseModal.vue'
 import EditCourseModal from '@/components/EditCourseModal.vue'
@@ -57,6 +59,8 @@ import type { DashboardData } from '@/types/DashboardData'
 import CourseLessonsModal from '@/components/CourseLessonsModal.vue'
 
 const dashboard = ref<DashboardData | null>(null)
+const userWishlist = ref<Array<any> | null>(null)
+
 const userStore = useUserStore()
 const userId = userStore.user?.id
 
@@ -78,6 +82,7 @@ const selectedCourseForThumbnail = ref<{
 } | null>(null)
 
 const fetchDashboard = async () => {
+  if (!userId) return
   try {
     const response = await axios.get(`http://localhost:3000/api/user-dashboard/${userId}`)
     dashboard.value = response.data
@@ -86,8 +91,18 @@ const fetchDashboard = async () => {
   }
 }
 
+const fetchUserWishlist = async () => {
+  if (!userId) return
+  try {
+    const response = await axios.get(`http://localhost:3000/api/wishlist/${userId}`)
+    userWishlist.value = response.data
+  } catch (error) {
+    toast.error('Greška pri dohvatanju liste želja')
+  }
+}
+
 const deleteCourse = async (courseId: number) => {
-  if (!confirm('Da li ste sigurni da zelite da obrisete ovaj kurs?')) return;
+  if (!confirm('Da li ste sigurni da zelite da obrisete ovaj kurs?')) return
   try {
     await axios.delete(`http://localhost:3000/api/course/${courseId}`)
     toast.success('Kurs je uspešno obrisan')
@@ -129,13 +144,14 @@ const openCourseLessons = (course: { courseId: number; title: string }) => {
 }
 
 const handleDeleteLesson = async (lessonId: number) => {
-  if (!confirm('Da li ste sigurni da zelite da obrisete ovu lekciju?')) return;
+  if (!confirm('Da li ste sigurni da zelite da obrisete ovu lekciju?')) return
   try {
     if (!selectedCourseForLessons.value?.courseId) return
     await axios.delete(
       `http://localhost:3000/api/lesson/course/${selectedCourseForLessons.value.courseId}/delete-lesson/${lessonId}`
     )
     toast.success('Lekcija je uspešno obrisana.')
+    // resetuj modal da se osvezi lista lekcija
     isLessonsModalOpen.value = false
     setTimeout(() => {
       isLessonsModalOpen.value = true
@@ -145,5 +161,18 @@ const handleDeleteLesson = async (lessonId: number) => {
   }
 }
 
-fetchDashboard()
+// Ovo prati user objekat i kad se učita ili promeni poziva fetchove
+watch(
+  () => userStore.user,
+  (newUser) => {
+    if (newUser?.id) {
+      fetchDashboard()
+      fetchUserWishlist()
+    } else {
+      dashboard.value = null
+      userWishlist.value = null
+    }
+  },
+  { immediate: true }
+)
 </script>

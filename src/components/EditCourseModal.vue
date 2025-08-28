@@ -1,5 +1,8 @@
 <template>
-  <div class="fixed inset-0 z-[9999] flex items-center justify-center backdrop-blur-sm bg-black/50">
+  <div 
+    class="fixed inset-0 z-[9999] flex items-center justify-center backdrop-blur-sm bg-black/50"
+    @click.self="closeModal"
+  >
     <div class="bg-white rounded p-6 max-w-lg w-full">
       <h2 class="text-xl font-bold mb-4">Izmeni kurs</h2>
       <form @submit.prevent="handleSubmitForm" class="space-y-4">
@@ -59,6 +62,10 @@ watch(
   },
   { deep: true }
 )
+
+const closeModal = () => {
+  emit('close')
+}
 
 const handleSubmitForm = handleSubmit(async (values) => {
   try {

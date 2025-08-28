@@ -6,7 +6,7 @@
         v-for="category in categories"
         :key="category.categoryId"
         :to="{ path: '/courses', query: { categoryId: category.categoryId } }"
-        class="bg-gray-200 p-6 rounded-lg shadow-md cursor-pointer block hover:shadow-lg transition"
+        class="bg-gray-200 p-6 rounded-lg shadow-md cursor-pointer block hover:shadow-lg transition dark:text-black"
       >
         <h3 class="text-2xl text-center font-semibold mb-4">{{ category.name }}</h3>
       </RouterLink>

@@ -1,17 +1,17 @@
 <template>
   <div class="bg-white dark:bg-dark-lighter-variant shadow-xl rounded p-6 w-full max-w-5xl">
-    <p class="text-xl pb-6 border-b dark:border-b-dark border-b-slate-200 dark:text-white">Измени своју шифру</p>
+    <p class="text-xl pb-6 border-b dark:border-b-dark border-b-slate-200 dark:text-white">Izmenite svoju šifru</p>
     <form class="flex flex-col gap-y-6 mt-6" @submit.prevent="onSubmit">
       <div class="flex">
-        <BaseInput name="password" label="Тренутна шифра" class="w-full" type="password" />
+        <BaseInput name="password" label="Trenutna šifra" class="w-full" type="password" />
       </div>
       <div class="flex sm:gap-x-6 gap-y-6 sm:flex-nowrap flex-wrap">
-        <BaseInput name="newPassword" label="Нова шифра" class="sm:basis-6/12 basis-full" type="password" />
-        <BaseInput name="confirmNewPassword" label="Потврди шифру" class="sm:basis-6/12 basis-full" type="password" />
+        <BaseInput name="newPassword" label="Nova šifra" class="sm:basis-6/12 basis-full" type="password" />
+        <BaseInput name="confirmNewPassword" label="Potvrdi šifru" class="sm:basis-6/12 basis-full" type="password" />
       </div>
       <div class="flex justify-center">
         <BaseButton type="submit">
-          <span>Сачувај</span>
+          <span>Sačuvaj</span>
         </BaseButton>
       </div>
     </form>
@@ -42,12 +42,12 @@ const onSubmit = handleSubmit(async (values) => {
     await axios.put<string>(`http://localhost:3000/api/user/${userId}/password`, {
       password: values.newPassword
     })
-    toast.success('Шифра је успешно промењена')
+    toast.success('Šifra je uspešno promenjena')
   } catch (e) {
     if (e instanceof AxiosError) {
       toast.error(e.response?.data.message)
     } else {
-      toast.error('Дошло је до грешке приликом промене лозинке. Покушајте поново.')
+      toast.error('Došlo je do greške prilikom promene lozinke. Pokušajte ponovo.')
     }
   }
 }, scrollToFirstError)

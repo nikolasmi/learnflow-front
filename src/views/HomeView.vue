@@ -10,7 +10,7 @@
       </RouterLink>
     </section>
     <PopularCategories :categories="categories" />
-    <PopularCourses :courses="popularCourses" :isLoggedIn="isLoggedIn" :userPurchases="userPurchases"/>
+    <PopularCourses :courses="popularCourses" :isLoggedIn="isLoggedIn" :userPurchases="userPurchases" :userWishlist="userWishlist"/>
   </div>
 </template>
 
@@ -29,6 +29,7 @@ const isLoggedIn = userStore.user !== null
 const userId = userStore.user?.id ?? 0
 
 const userPurchases = ref<number[]>([])
+const userWishlist = ref<number[]>([])
 const popularCourses = ref<Course[] | null>(null)
 const categories = ref<Category[] | null>(null)
 
@@ -62,6 +63,16 @@ if (isLoggedIn) {
     })
     .catch(() => {
       userPurchases.value = []
+    })
+}
+
+if (isLoggedIn) {
+  axios.get(`http://localhost:3000/api/wishlist/${userId}`)
+    .then(res => {
+      userWishlist.value = res.data.map((p: any) => parseInt(p.courseId))
+    })
+    .catch(() => {
+      userWishlist.value = []
     })
 }
 </script>

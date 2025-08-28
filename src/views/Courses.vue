@@ -5,30 +5,34 @@
     <input
       type="text"
       v-model="searchInput"
-      placeholder="Pretrazi kurs..."
-      class="border border-black rounded-full p-2 text-lg w-64 focus:outline-none focus:ring-2 focus:ring-black"
+      placeholder="Pretraži kurs..."
+      class="border border-black rounded-full p-2 text-lg w-64 focus:outline-none focus:ring-2 focus:ring-black dark:bg-gray-200 dark:text-black"
     />
   </div>
 
   <section class="my-8" v-if="courses?.length">
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-      <RouterLink
+      <div
         v-for="course in searchCourse"
         :key="course.courseId"
-        :to="`/courses/${course.courseId}/lessons/preview`"
         class="bg-white shadow-lg p-4 rounded-lg transition hover:shadow-xl flex flex-col"
       >
-        <img
-          :src="course.thumbnail?.imagePath
-            ? `http://localhost:3000/assets/thumbnails/${course.thumbnail.imagePath}`
-            : '/default-video.webp'"
-          alt="Thumbnail za kurs"
-          class="w-full h-40 object-cover mb-4 rounded-lg"
-        />
+        <RouterLink
+          :to="`/courses/${course.courseId}/lessons/preview`"
+          class="block"
+        >
+          <img
+            :src="course.thumbnail?.imagePath
+              ? `http://localhost:3000/assets/thumbnails/${course.thumbnail.imagePath}`
+              : '/default-video.webp'"
+            alt="Thumbnail za kurs"
+            class="w-full h-40 object-cover mb-4 rounded-lg"
+          />
 
-        <h3 class="text-xl font-semibold">{{ course.title }}</h3>
-        <p class="text-gray-600 mb-4">{{ course.shortDescription }}</p>
-        <p class="text-black font-bold mb-4">${{ course.price }}</p>
+          <h3 class="text-xl font-semibold">{{ course.title }}</h3>
+          <p class="text-gray-600 mb-4">{{ course.shortDescription }}</p>
+          <p class="text-black font-bold mb-4">${{ course.price }}</p>
+        </RouterLink>
 
         <div class="mt-auto flex gap-2">
           <button
@@ -42,13 +46,15 @@
             {{ userPurchases.includes(course.courseId) ? 'Već kupljen' : 'Kupi' }}
           </button>
           <button
-            class="w-full bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
+            class="w-full bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition
+                   disabled:bg-gray-400 disabled:cursor-not-allowed"
+            :disabled="userWishlist.includes(course.courseId)"
             @click="addToWishlist(course.courseId)"
           >
-            Lista želja
+            {{ userWishlist.includes(course.courseId) ? "U listi želja" : "Lista želja" }}
           </button>
         </div>
-      </RouterLink>
+      </div>
     </div>
   </section>
 
@@ -86,6 +92,7 @@ const userStore = useUserStore()
 const userId = userStore.user?.id ?? 0
 const isLoggedIn = computed(() => userStore.user !== null)
 const userPurchases = ref<number[]>([])
+const userWishlist = ref<number[]>([])
 
 const route = useRoute()
 
@@ -121,6 +128,19 @@ const fetchUserPurchases = async () => {
   }
 }
 
+const fetchUserWishlist = async () => {
+  if (!isLoggedIn.value) {
+    userWishlist.value = []
+    return
+  }
+  try {
+    const res = await axios.get(`http://localhost:3000/api/wishlist/${userId}`)
+    userWishlist.value = res.data.map((p: any) => Number(p.courseId))
+  } catch {
+    userWishlist.value = []
+  }
+}
+
 const searchCourse = computed(() => {
   return (courses.value || []).filter((course) =>
   course.title.toLowerCase().includes(searchInput.value.toLowerCase())
@@ -129,19 +149,37 @@ const searchCourse = computed(() => {
 
 const buyCourse = (course: Course) => {
   if (!isLoggedIn.value) {
-    toast.warning('Морате бити пријављени да бисте купили курс.')
+    toast.warning('Morate biti prijavljeni da biste kupili kurs.')
     return
   }
   if (userPurchases.value.includes(course.courseId)) {
-    toast.info('Већ сте купили овај курс.')
+    toast.info('Već ste kupili ovaj kurs.')
     return
   }
   selectedCourse.value = course
   isModalOpen.value = true
 }
 
-const addToWishlist = (courseId: number) => {
-  toast.success(`Kurs ${courseId} dodat u listu želja.`)
+const addToWishlist = async (courseId: number) => {
+  if (!isLoggedIn.value) {
+    toast.warning('Morate biti prijavljeni da biste dodali u listu želja.')
+    return
+  }
+  if (userWishlist.value.includes(courseId)) {
+    toast.info('Kurs je već u listi želja.')
+    return
+  }
+
+  try {
+    await axios.post('http://localhost:3000/api/wishlist', {
+      userId,
+      courseId,
+    })
+    toast.success('Kurs je dodat u listu želja.')
+    userWishlist.value.push(courseId)
+  } catch (error) {
+    toast.error('Greška prilikom dodavanja kursa u listu želja.')
+  }
 }
 
 const handlePurchase = () => {
@@ -150,4 +188,5 @@ const handlePurchase = () => {
 
 watch(() => route.query.categoryId, fetchCourses, { immediate: true })
 watch(() => userStore.user, fetchUserPurchases, { immediate: true })
+watch(() => userStore.user, fetchUserWishlist, { immediate: true })
 </script>

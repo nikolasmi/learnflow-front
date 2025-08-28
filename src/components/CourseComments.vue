@@ -1,6 +1,6 @@
 <template>
   <section class="max-w-5xl mx-auto mt-12 mb-12">
-    <h2 class="text-3xl font-bold mb-8 text-center">Коментари</h2>
+    <h2 class="text-3xl font-bold mb-8 text-center">Komentari</h2>
 
     <div class="flex justify-end mb-6">
       <button
@@ -8,7 +8,7 @@
         @click="tryOpenAddCommentModal"
         class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition disabled:bg-gray-400 disabled:cursor-not-allowed"
       >
-        Додај коментар
+        Dodaj komentar
       </button>
     </div>
 
@@ -27,10 +27,10 @@
       @commentEdited="() => { showEditModal = false; fetchComments(); }"
     />
 
-    <div v-if="loading" class="text-center text-gray-500">Учитавање коментара...</div>
+    <div v-if="loading" class="text-center text-gray-500">Učitavanje komentara...</div>
 
     <div v-else-if="comments.length === 0" class="text-center text-gray-500">
-      Још нема коментара за овај курс.
+      Još nema komentara za ovaj kurs.
     </div>
 
     <ul v-else class="space-y-6">
@@ -58,13 +58,13 @@
             class="bg-yellow-400 text-black px-3 py-1 rounded hover:bg-yellow-500 transition"
             @click="() => openEditModal(comment)"
           >
-            Измени
+            Izmeni
           </button>
           <button
             class="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700 transition"
             @click="deleteComment(comment.commentId)"
           >
-            Обриши
+            Obriši
           </button>
         </div>
       </li>
@@ -116,7 +116,7 @@ const isCoursePurchased = () => {
 
 const tryOpenAddCommentModal = () => {
   if (!isCoursePurchased()) {
-    toast.warning('Морате купити курс да бисте додали коментар.')
+    toast.warning('Morate kupiti kurs da biste dodali komentar.')
     return
   }
   showModal.value = true
@@ -144,13 +144,13 @@ const openEditModal = (comment: Comment) => {
 }
 
 const deleteComment = async (commentId: number) => {
-  if (!confirm('Да ли сте сигурни да желите да обришете овај коментар?')) return
+  if (!confirm('Da li ste sigurni da želite da obrišete ovaj komentar?')) return
   try {
     await axios.delete(`http://localhost:3000/api/comment/${commentId}`)
-    toast.success('Коментар је успешно обрисан.')
+    toast.success('Komentar je uspešno obrisan.')
     fetchComments()
   } catch (error) {
-    toast.error('Грешка при брисању коментара.')
+    toast.error('Greška pri brisanju komentara.')
   }
 }
 

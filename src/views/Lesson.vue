@@ -1,13 +1,13 @@
 <template>
   <div class="p-6 max-w-5xl mx-auto">
     <section v-if="course" class="mb-12 text-center">
-      <h1 class="text-4xl font-bold mb-4 text-gray-900">{{ course.title }}</h1>
-      <p class="text-lg text-gray-600 mb-2">{{ course.shortDescription }}</p>
-      <p class="mb-4 text-gray-700">{{ course.description }}</p>
+      <h1 class="text-4xl font-bold mb-4 text-gray-900 dark:text-white">{{ course.title }}</h1>
+      <p class="text-lg text-gray-600 mb-2 dark:text-white">{{ course.shortDescription }}</p>
+      <p class="mb-4 text-gray-700 dark:text-white">{{ course.description }}</p>
     </section>
 
     <section v-if="course?.lessons?.length">
-      <h2 class="text-3xl font-bold text-center mb-10 text-[#222b36]">Lekcije</h2>
+      <h2 class="text-3xl font-bold text-center mb-10 text-[#222b36] dark:text-white">Lekcije</h2>
       <div class="space-y-6">
         <div
           v-for="lesson in course.lessons"

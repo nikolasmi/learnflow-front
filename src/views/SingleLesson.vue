@@ -1,9 +1,9 @@
 <template>
   <div class="p-6 max-w-4xl mx-auto">
     <section v-if="lesson" class="text-center">
-      <h1 class="text-3xl font-bold mb-4 text-gray-900">{{ lesson.title }}</h1>
+      <h1 class="text-3xl font-bold mb-4 text-gray-900 dark:text-white">{{ lesson.title }}</h1>
 
-      <p class="text-lg mb-4 text-gray-900">{{ lesson.description }}</p>
+      <p class="text-lg mb-4 text-gray-900 dark:text-white">{{ lesson.description }}</p>
 
       <video
         v-if="lesson.videoUrl"

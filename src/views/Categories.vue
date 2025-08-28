@@ -4,8 +4,8 @@
         <input
             type="text"
             v-model="searchInput"
-            placeholder="Pretrazi kategoriju..."
-            class="border border-black rounded-full p-2 text-lg w-64 focus:outline-none focus:ring-2 focus:ring-black"
+            placeholder="Pretraži kategoriju..."
+            class="border border-black rounded-full p-2 text-lg w-64 focus:outline-none focus:ring-2 focus:ring-black dark:bg-gray-200 dark:text-black"
         />
     </div>
     <section class="my-8" v-if="categories?.length">
@@ -13,7 +13,7 @@
         <div
           v-for="category in searchCategorie"
           :key="category.categoryId"
-          class="bg-gray-200 p-6 rounded-lg shadow-md cursor-pointer"
+          class="bg-gray-200 text-black p-6 rounded-lg shadow-md cursor-pointer"
           @click="goToCategory(category.categoryId)"
         >
           <h3 class="text-2xl text-center font-semibold mb-4">{{ category.name }}</h3>

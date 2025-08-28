@@ -1,6 +1,6 @@
 <template>
   <div class="bg-white dark:bg-dark-lighter-variant shadow-xl rounded p-6 w-full max-w-5xl relative">
-    <p class="text-xl pb-6 border-b dark:border-b-dark border-b-slate-200 dark:text-white">Измени профил</p>
+    <p class="text-xl pb-6 border-b dark:border-b-dark border-b-slate-200 dark:text-white">Izmeni profil</p>
     <div class="mt-6 flex items-center gap-x-6" :class="[userStore.isLoaing && '!invisible']">
       <!-- <button
         class="relative rounded-full bg-gray-100 dark:bg-gray-300 bg:white size-20 flex items-center justify-center cursor-pointer"
@@ -17,16 +17,16 @@
     </div>
     <form class="relative flex flex-col gap-y-6 mt-6" @submit.prevent="onSubmit" :class="[userStore.isLoaing && '!invisible']">
       <div class="flex gap-x-6">
-        <BaseInput name="name" label="Име" class="basis-6/12" />
-        <BaseInput name="surname" label="Презиме" class="basis-6/12" />
+        <BaseInput name="name" label="Ime" class="basis-6/12" />
+        <BaseInput name="surname" label="Prezime" class="basis-6/12" />
       </div>
       <div class="flex gap-x-6">
         <BaseInput name="email" label="Email" class="basis-6/12" />
-        <BaseInput name="phone" label="Број телефона" class="basis-6/12" />
+        <BaseInput name="phone" label="Broj telefona" class="basis-6/12" />
       </div>
       <div class="flex justify-center">
         <BaseButton type="submit" :loading="isSubmitting">
-          <span>Сачувај</span>
+          <span>Sačuvaj</span>
         </BaseButton>
       </div>
     </form>
@@ -44,7 +44,7 @@ import { profileSchema } from '../validation/profileSchema'
 import type { Profile } from '@/types/Profile'
 import BaseButton from '@/components/base/BaseButton.vue'
 import { scrollToFirstError } from '../utils/scrollToFirstError'
-import { computed, ref, watch } from 'vue'
+import { computed, watch } from 'vue'
 import Spinner from '../components/Spinner.vue'
 import { toast } from 'vue3-toastify'
 import { errorHandler } from '../utils/errorHandler'
@@ -64,7 +64,7 @@ const onSubmit = handleSubmit(async (values) => {
   try {
     const { data } = await axios.put<Profile>(`http://localhost:3000/api/user/${userId}/details`, values)
     if (userStore.profile?.name) userStore.setProfile(data)
-    toast.success('Корисник је успешно измењен')
+    toast.success('Korisnik je uspešno izmenjen')
   } catch (e) {
     const [data, message] = errorHandler(e)
     toast.error(message)

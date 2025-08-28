@@ -1,5 +1,6 @@
 import type { CreatedCourse } from "./CreatedCourse"
 import type { PurchasePreview } from "./PurchasePreview"
+import type { userWishlist } from "./UserWishlist"
 
 export interface DashboardData {
   totalPurchases: number
@@ -9,4 +10,5 @@ export interface DashboardData {
   totalEarned: number
   recentPurchases: PurchasePreview[]
   ownCourses: CreatedCourse[]
+  wishlist: userWishlist[]
 }

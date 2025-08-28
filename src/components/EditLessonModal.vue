@@ -1,5 +1,8 @@
 <template>
-  <div class="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm flex justify-center items-center z-50">
+  <div 
+    class="fixed inset-0 bg-black/50 backdrop-blur-sm flex justify-center items-center z-50"
+    @click.self="closeModal"
+  >
     <div class="bg-white rounded-lg p-6 w-full max-w-lg relative">
       <h2 class="text-xl font-semibold mb-4">Izmeni lekciju</h2>
 
@@ -62,6 +65,10 @@ const handleFileChange = (e: Event) => {
   if (files && files.length > 0) {
     videoFile.value = files[0]
   }
+}
+
+const closeModal = () => {
+  emit('close')
 }
 
 const submitEdit = async () => {

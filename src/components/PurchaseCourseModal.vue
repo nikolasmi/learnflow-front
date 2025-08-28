@@ -1,7 +1,7 @@
 <template>
   <div
-    class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
-    @click.self="emit('close')"
+    class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50"
+    @click.self="closeModal"
   >
     <div class="bg-white rounded-lg p-6 w-full max-w-md">
       <h2 class="text-2xl font-semibold mb-4">Potvrda kupovine</h2>
@@ -99,6 +99,10 @@ const { handleSubmit, errors, values, setFieldValue } = useForm({
     terms: false,
   },
 })
+
+const closeModal = () => {
+  emit('close')
+}
 
 const submitPurchase = handleSubmit(async () => {
   try {

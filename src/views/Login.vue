@@ -6,28 +6,28 @@
       aria-label="Назад на почетну"
     >
       <IconOut class="w-6 h-6 text-gray-700" fill="black"/>
-      <span class="text-sm mt-1 text-gray-700 select-none">Назад на почетну</span>
+      <span class="text-sm mt-1 text-gray-700 select-none">Nazad na početnu</span>
     </RouterLink>
 
     <form class="flex flex-col gap-y-4 items-center w-full max-w-sm" @submit.prevent="submit">
-      <p class="text-2xl font-bold">Пријава</p>
-      <p>Унесите мејл и шифру како бисте приступили налогу.</p>
+      <p class="text-2xl font-bold">Prijava</p>
+      <p>Unesite email i šifru kako biste pristupili nalogu.</p>
 
       <div class="w-full flex flex-col gap-y-4">
-        <BaseInput name="email" label="Е-маил" :required="true" type="email"/>
-        <BaseInput name="password" label="Шифра" :required="true" type="password" />
+        <BaseInput name="email" label="E-mail" :required="true" type="email"/>
+        <BaseInput name="password" label="Šifra" :required="true" type="password" />
       </div>
 
       <BaseButton class="w-full flex justify-center" type="submit">
-        <span class="flex gap-x-1">Пријава</span>
+        <span class="flex gap-x-1">Prijava</span>
       </BaseButton>
     </form>
 
     <div class="flex flex-col items-center gap-y-2 mt-4">
       <p>
-        Немате налог? 
+        Nemate nalog? 
         <RouterLink to="/register" class="text-blue-600 hover:underline focus:outline-none">
-          Региструјте се
+          Registruj se
         </RouterLink>
       </p>
     </div>
@@ -66,10 +66,10 @@ const submit = handleSubmit(async (values) => {
     userStore.loadUserFromToken()
     await userStore.fetchProfile()
 
-    toast.success('Успешна пријава')
+    toast.success('Uspešna prijava')
     router.push('/')
   } catch (error) {
-    toast.error('Неуспешна пријава. Проверите податке.')
+    toast.error('Neuspešna prijava. Proverite podatke.')
   }
 })
 

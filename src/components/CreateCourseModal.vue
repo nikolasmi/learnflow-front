@@ -1,23 +1,26 @@
 <template>
-  <div class="fixed inset-0 z-[9999] flex items-center justify-center backdrop-blur-sm bg-black/50">
+  <div 
+    class="fixed inset-0 z-[9999] flex items-center justify-center backdrop-blur-sm bg-black/50"
+    @click.self="closeModal"
+  >
     <div class="bg-white w-full max-w-xl rounded-lg shadow-lg p-6 relative">
-      <h2 class="text-xl font-semibold mb-4">Kreiraj novi курс</h2>
+      <h2 class="text-xl font-semibold mb-4">Kreiraj novi kurs</h2>
 
       <form @submit.prevent="handleSubmitForm" class="space-y-4">
-        <BaseInput name="title" label="Наслов" :required="true" />
-        <BaseInput name="shortDescription" label="Кратак опис" :required="true" />
-        <BaseInput name="description" label="Опис" :required="true" />
-        <BaseInput name="price" label="Цена" type="number" :required="true" />
+        <BaseInput name="title" label="Naslov" :required="true" />
+        <BaseInput name="shortDescription" label="Kratak opis" :required="true" />
+        <BaseInput name="description" label="Opis" :required="true" />
+        <BaseInput name="price" label="Cena" type="number" :required="true" />
 
         <div>
-          <label for="categoryId" class="block mb-1 font-medium">Категорија</label>
+          <label for="categoryId" class="block mb-1 font-medium">Kategorija</label>
           <Field
             as="select"
             name="categoryId"
             id="categoryId"
             class="w-full border px-3 py-2 rounded"
           >
-            <option value="">-- Изаберите категорију --</option>
+            <option value="">-- Izaberite kategoriju --</option>
             <option
               v-for="category in categories"
               :key="category.categoryId"
@@ -29,8 +32,8 @@
         </div>
 
         <div class="flex justify-end gap-3 pt-2">
-          <button type="button" class="bg-gray-300 px-4 py-2 rounded" @click="$emit('close')">Откажи</button>
-          <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">Креирај</button>
+          <button type="button" class="bg-gray-300 px-4 py-2 rounded" @click="$emit('close')">Otkaži</button>
+          <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">Kreiraj</button>
         </div>
       </form>
     </div>
@@ -63,8 +66,12 @@ const fetchCategories = async () => {
     const res = await axios.get('http://localhost:3000/api/category')
     categories.value = res.data
   } catch {
-    toast.error('Грешка при учитавању категорија')
+    toast.error('Greška pri učitavanju kategorija')
   }
+}
+
+const closeModal = () => {
+  emit('close')
 }
 
 const handleSubmitForm = handleSubmit(async (values) => {
@@ -74,11 +81,11 @@ const handleSubmitForm = handleSubmit(async (values) => {
       ...values,
       userId
     })
-    toast.success('Курс је успешно креиран')
+    toast.success('Kurs je uspešno kreiran')
     emit('created')
     emit('close')
   } catch {
-    toast.error('Грешка при креирању курса')
+    toast.error('Greška pri kreiranju kursa')
   }
 })
 

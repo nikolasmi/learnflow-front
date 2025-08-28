@@ -1,6 +1,6 @@
 <template>
   <div
-    class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50"
+    class="fixed inset-0 backdrop-blur-sm bg-black/50 flex justify-center items-center z-50"
     @click.self="closeModal"
   >
     <div class="bg-white rounded-lg p-6 w-full max-w-md shadow-lg relative">
@@ -12,11 +12,11 @@
         ✕
       </button>
 
-      <h3 class="text-2xl font-semibold mb-4">Измени коментар</h3>
+      <h3 class="text-2xl font-semibold mb-4">Izmeni komentar</h3>
 
       <form @submit.prevent="submitEdit" class="space-y-4">
         <div>
-          <label for="comment" class="block mb-1 font-medium">Коментар</label>
+          <label for="comment" class="block mb-1 font-medium">Komentar</label>
           <textarea
             id="comment"
             v-model="comment"
@@ -27,7 +27,7 @@
         </div>
 
         <div>
-          <label for="rating" class="block mb-1 font-medium">Оцена (1-5)</label>
+          <label for="rating" class="block mb-1 font-medium">Ocena (1-5)</label>
           <input
             id="rating"
             type="number"
@@ -45,13 +45,13 @@
             @click="closeModal"
             class="px-4 py-2 rounded border border-gray-300 hover:bg-gray-100 transition"
           >
-            Откажи
+            Otkaži
           </button>
           <button
             type="submit"
             class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
           >
-            Сачувај
+            Sačuvaj
           </button>
         </div>
       </form>
@@ -100,11 +100,11 @@ const submitEdit = async () => {
       comment: comment.value,
       rating: rating.value,
     })
-    toast.success('Коментар је успешно измењен')
+    toast.success('Komentar je uspešno izmenjen')
     emit('commentEdited')
     closeModal()
   } catch (err) {
-    toast.error('Грешка при изменама')
+    toast.error('Greška pri izmenama komentara')
   }
 }
 </script>

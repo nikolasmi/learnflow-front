@@ -1,6 +1,6 @@
 <template>
   <div
-    class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50"
+    class="fixed inset-0 backdrop-blur-sm bg-black/50 flex justify-center items-center z-50"
     @click.self="closeModal"
   >
     <div class="bg-white rounded-lg p-6 w-full max-w-md shadow-lg relative">
@@ -12,11 +12,11 @@
         ✕
       </button>
 
-      <h3 class="text-2xl font-semibold mb-4">Додај коментар</h3>
+      <h3 class="text-2xl font-semibold mb-4">Dodaj komentar</h3>
 
       <form @submit.prevent="submitComment" class="space-y-4">
         <div>
-          <label for="comment" class="block mb-1 font-medium">Коментар</label>
+          <label for="comment" class="block mb-1 font-medium">Komentar</label>
           <textarea
             id="comment"
             v-model="comment"
@@ -27,7 +27,7 @@
         </div>
 
         <div>
-          <label for="rating" class="block mb-1 font-medium">Оцена (1-5)</label>
+          <label for="rating" class="block mb-1 font-medium">Ocena (1-5)</label>
           <input
             id="rating"
             type="number"
@@ -45,13 +45,13 @@
             @click="closeModal"
             class="px-4 py-2 rounded border border-gray-300 hover:bg-gray-100 transition"
           >
-            Откажи
+            Otkaži
           </button>
           <button
             type="submit"
             class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
           >
-            Потврди
+            Potvrdi
           </button>
         </div>
       </form>
@@ -81,7 +81,7 @@ const closeModal = () => {
 
 const submitComment = async () => {
   if (rating.value < 1 || rating.value > 5) {
-    toast.error('Оцена мора бити између 1 и 5')
+    toast.error('Ocena mora biti između 1 i 5')
     return
   }
 
@@ -92,13 +92,13 @@ const submitComment = async () => {
       comment: comment.value,
       rating: rating.value,
     })
-    toast.success('Коментар успешно додат')
+    toast.success('komentar uspešno dodat')
     emit('commentAdded')
     closeModal()
     comment.value = ''
     rating.value = 5
   } catch (error) {
-    toast.error('Грешка при додавању коментара')
+    toast.error('Greška pri dodavanju komentara')
   }
 }
 </script>

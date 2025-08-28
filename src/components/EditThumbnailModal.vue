@@ -1,5 +1,8 @@
 <template>
-  <div class="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-50">
+  <div 
+    class="fixed inset-0 bg-black/50 backdrop-blur-sm flex justify-center items-center z-50"
+    @click.self="closeModal"
+  >
     <div class="bg-white rounded-lg p-6 w-full max-w-md relative">
       <h2 class="text-xl font-semibold mb-4">Izmeni thumbnail za: {{ course.title }}</h2>
 
@@ -66,6 +69,10 @@ const handleFileChange = (e: Event) => {
   if (target.files && target.files[0]) {
     selectedFile.value = target.files[0]
   }
+}
+
+const closeModal = () => {
+  emit('close')
 }
 
 const uploadThumbnail = async () => {

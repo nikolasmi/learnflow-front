@@ -31,10 +31,12 @@
             {{ props.userPurchases.includes(course.courseId) ? 'Već kupljen' : 'Kupi' }}
           </button>
           <button
-            class="w-full bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
+            class="w-full bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition
+                   disabled:bg-gray-400 disabled:cursor-not-allowed"
+            :disabled="props.userWishlist.includes(course.courseId)"
             @click.stop.prevent="addToWishlist(course.courseId)"
           >
-            Lista želja
+            {{ props.userWishlist.includes(course.courseId) ? 'U listi želja' : 'Lista želja' }}
           </button>
         </div>
       </RouterLink>
@@ -57,11 +59,13 @@ import { toast } from 'vue3-toastify'
 import type { Course } from '@/types/Course'
 import PurchaseCourseModal from './PurchaseCourseModal.vue'
 import { useUserStore } from '@/stores/user';
+import axios from 'axios';
 
 const props = defineProps<{ 
   courses: Course[] | null;
   isLoggedIn: boolean;
   userPurchases: number[];
+  userWishlist: number[];
 }>()
 
 const isModalOpen = ref(false)
@@ -83,8 +87,25 @@ const buyCourse = (course: Course) => {
   isModalOpen.value = true
 }
 
-const addToWishlist = (courseId: number) => {
-  toast.success(`Kurs ${courseId} dodat u listu želja.`)
+const addToWishlist = async (courseId: number) => {
+  if (!props.isLoggedIn) {
+    toast.warning('Morate biti prijavljeni da biste dodali u listu želja.')
+    return
+  }
+  if (props.userWishlist.includes(courseId)) {
+    toast.info('Kurs je već u listi želja.')
+    return
+  }
+
+  try {
+    await axios.post('http://localhost:3000/api/wishlist', {
+      userId,
+      courseId
+    })
+    toast.success('Kurs je dodat u listu želja.')
+  } catch (error) {
+    toast.error('Greška prilikom dodavanja kursa u listu želja.')
+  }
 }
 
 const handlePurchase = () => {
