@@ -41,6 +41,13 @@
         </div>
       </RouterLink>
     </div>
+    <div class="flex justify-center">
+      <RouterLink to="/courses">
+        <button class="mt-8 text-slate-900 text-xl py-2 px-4 border-2 rounded-xl bg-slate-300">
+          Pogledaj sve
+        </button>
+      </RouterLink>
+    </div>
 
     <PurchaseCourseModal
       v-if="isModalOpen && selectedCourse"

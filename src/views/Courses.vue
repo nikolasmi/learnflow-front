@@ -1,13 +1,90 @@
 <template>
   <h1 class="text-3xl font-semibold text-center mb-8">Svi Kursevi</h1>
 
-  <div class="flex mb-6">
+  <div class="flex justify-between items-center mb-6">
     <input
       type="text"
       v-model="searchInput"
       placeholder="Pretraži kurs..."
       class="border border-black rounded-full p-2 text-lg w-64 focus:outline-none focus:ring-2 focus:ring-black dark:bg-gray-200 dark:text-black"
     />
+
+    <button
+      @click="isFilterOpen = true"
+      class="px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-900"
+    >
+      Filteri
+    </button>
+  </div>
+
+  <div
+    v-if="isFilterOpen"
+    class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
+  >
+    <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
+      <h2 class="text-xl font-semibold mb-4">Filtriraj kurseve</h2>
+
+      <div class="space-y-4">
+        <div>
+          <label class="block font-medium mb-1">Kategorija</label>
+          <input
+            type="number"
+            v-model="filters.categoryId"
+            placeholder="Unesi ID kategorije"
+            class="border p-2 rounded w-full"
+          />
+        </div>
+
+        <div>
+          <label class="block font-medium mb-1">Datum od</label>
+          <input
+            type="date"
+            v-model="filters.dateFrom"
+            class="border p-2 rounded w-full"
+          />
+        </div>
+
+        <div>
+          <label class="block font-medium mb-1">Datum do</label>
+          <input
+            type="date"
+            v-model="filters.dateTo"
+            class="border p-2 rounded w-full"
+          />
+        </div>
+
+        <div>
+          <label class="block font-medium mb-1">Maksimalna cena</label>
+          <input
+            type="number"
+            v-model="filters.maxPrice"
+            placeholder="Unesi maksimalnu cenu"
+            class="border p-2 rounded w-full"
+          />
+        </div>
+      </div>
+
+      <div class="mt-6 flex justify-end gap-2">
+        <button
+          @click="resetFilters"
+          class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+        >
+          Poništi filtere
+        </button>
+        <button
+          @click="isFilterOpen = false"
+          class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
+        >
+          Zatvori
+        </button>
+        <button
+          @click="applyFilters"
+          class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+        >
+          Primeni filter
+        </button>
+      </div>
+    </div>
   </div>
 
   <section class="my-8" v-if="courses?.length">
@@ -76,7 +153,7 @@
 import type { Course } from '@/types/Course'
 import axios from 'axios'
 import { computed, ref, watch } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { toast } from 'vue3-toastify'
 import PurchaseCourseModal from '@/components/PurchaseCourseModal.vue'
 import { useUserStore } from '@/stores/user'
@@ -88,6 +165,14 @@ const loading = ref(false)
 const isModalOpen = ref(false)
 const selectedCourse = ref<Course | null>(null)
 
+const isFilterOpen = ref(false)
+const filters = ref({
+  categoryId: '',
+  dateFrom: '',
+  dateTo: '',
+  maxPrice: ''
+})
+
 const userStore = useUserStore()
 const userId = userStore.user?.id ?? 0
 const isLoggedIn = computed(() => userStore.user !== null)
@@ -95,18 +180,15 @@ const userPurchases = ref<number[]>([])
 const userWishlist = ref<number[]>([])
 
 const route = useRoute()
+const router = useRouter()
 
-const fetchCourses = async () => {
+const fetchCourses = async (params = {}) => {
   try {
     loading.value = true
-    const id = route.query.categoryId
-    const categoryId = id ? Number(id) : null
 
-    const url = categoryId
-      ? `http://localhost:3000/api/course?categoryId=${categoryId}`
-      : `http://localhost:3000/api/course`
-
-    const { data } = await axios.get<Course[]>(url)
+    const { data } = await axios.get<Course[]>('http://localhost:3000/api/course', {
+      params
+    })
     courses.value = data
   } catch (e) {
     toast.error('Greška prilikom dohvatanja kurseva')
@@ -143,8 +225,8 @@ const fetchUserWishlist = async () => {
 
 const searchCourse = computed(() => {
   return (courses.value || []).filter((course) =>
-  course.title.toLowerCase().includes(searchInput.value.toLowerCase())
-)
+    course.title.toLowerCase().includes(searchInput.value.toLowerCase())
+  )
 })
 
 const buyCourse = (course: Course) => {
@@ -171,13 +253,10 @@ const addToWishlist = async (courseId: number) => {
   }
 
   try {
-    await axios.post('http://localhost:3000/api/wishlist', {
-      userId,
-      courseId,
-    })
+    await axios.post('http://localhost:3000/api/wishlist', { userId, courseId })
     toast.success('Kurs je dodat u listu želja.')
     userWishlist.value.push(courseId)
-  } catch (error) {
+  } catch {
     toast.error('Greška prilikom dodavanja kursa u listu želja.')
   }
 }
@@ -186,7 +265,46 @@ const handlePurchase = () => {
   toast.success('Kupovina uspešna! Kurs je dodat na dashboard')
 }
 
-watch(() => route.query.categoryId, fetchCourses, { immediate: true })
+const applyFilters = async () => {
+  const params: any = {}
+
+  if (filters.value.categoryId) params.categoryId = Number(filters.value.categoryId)
+  if (filters.value.dateFrom) params.dateFrom = filters.value.dateFrom
+  if (filters.value.dateTo) params.dateTo = filters.value.dateTo
+  if (filters.value.maxPrice) params.maxPrice = Number(filters.value.maxPrice)
+
+  router.replace({ query: { ...params } })
+
+  await fetchCourses(params)
+  isFilterOpen.value = false
+}
+
+const resetFilters = async () => {
+  filters.value = {
+    categoryId: '',
+    dateFrom: '',
+    dateTo: '',
+    maxPrice: ''
+  }
+
+  router.replace({ query: {} })
+
+  await fetchCourses()
+  isFilterOpen.value = false
+}
+
+watch(
+  () => route.query,
+  () => {
+    const params: any = { ...route.query }
+    if (params.categoryId) params.categoryId = Number(params.categoryId)
+    if (params.maxPrice) params.maxPrice = Number(params.maxPrice)
+
+    fetchCourses(params)
+  },
+  { immediate: true }
+)
+
 watch(() => userStore.user, fetchUserPurchases, { immediate: true })
 watch(() => userStore.user, fetchUserWishlist, { immediate: true })
 </script>
