@@ -1,6 +1,72 @@
 <template>
   <h1 class="text-3xl font-semibold text-center mb-8">Svi Kursevi</h1>
 
+  <div class="bg-white shadow-md rounded-lg p-4 mb-6">
+    <h2 class="text-xl font-semibold mb-4">Filtriraj kurseve</h2>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div>
+        <label class="block font-medium mb-1">Kategorija</label>
+        <select
+          v-model="filters.categoryId"
+          class="border p-2 rounded w-full"
+        >
+          <option value="">Sve kategorije</option>
+          <option
+            v-for="cat in categories"
+            :key="cat.categoryId"
+            :value="cat.categoryId"
+          >
+            {{ cat.name }}
+          </option>
+        </select>
+      </div>
+
+      <div>
+        <label class="block font-medium mb-1">Datum od</label>
+        <input
+          type="date"
+          v-model="filters.dateFrom"
+          class="border p-2 rounded w-full"
+        />
+      </div>
+
+      <div>
+        <label class="block font-medium mb-1">Datum do</label>
+        <input
+          type="date"
+          v-model="filters.dateTo"
+          class="border p-2 rounded w-full"
+        />
+      </div>
+
+      <div>
+        <label class="block font-medium mb-1">Maksimalna cena</label>
+        <input
+          type="number"
+          v-model="filters.maxPrice"
+          placeholder="Unesi maksimalnu cenu"
+          class="border p-2 rounded w-full"
+        />
+      </div>
+    </div>
+
+    <div class="mt-6 flex justify-end gap-2">
+      <button
+        @click="resetFilters"
+        class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+      >
+        Poništi filtere
+      </button>
+      <button
+        @click="applyFilters"
+        class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+      >
+        Primeni filter
+      </button>
+    </div>
+  </div>
+
   <div class="flex justify-between items-center mb-6">
     <input
       type="text"
@@ -8,83 +74,6 @@
       placeholder="Pretraži kurs..."
       class="border border-black rounded-full p-2 text-lg w-64 focus:outline-none focus:ring-2 focus:ring-black dark:bg-gray-200 dark:text-black"
     />
-
-    <button
-      @click="isFilterOpen = true"
-      class="px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-900"
-    >
-      Filteri
-    </button>
-  </div>
-
-  <div
-    v-if="isFilterOpen"
-    class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
-  >
-    <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
-      <h2 class="text-xl font-semibold mb-4">Filtriraj kurseve</h2>
-
-      <div class="space-y-4">
-        <div>
-          <label class="block font-medium mb-1">Kategorija</label>
-          <input
-            type="number"
-            v-model="filters.categoryId"
-            placeholder="Unesi ID kategorije"
-            class="border p-2 rounded w-full"
-          />
-        </div>
-
-        <div>
-          <label class="block font-medium mb-1">Datum od</label>
-          <input
-            type="date"
-            v-model="filters.dateFrom"
-            class="border p-2 rounded w-full"
-          />
-        </div>
-
-        <div>
-          <label class="block font-medium mb-1">Datum do</label>
-          <input
-            type="date"
-            v-model="filters.dateTo"
-            class="border p-2 rounded w-full"
-          />
-        </div>
-
-        <div>
-          <label class="block font-medium mb-1">Maksimalna cena</label>
-          <input
-            type="number"
-            v-model="filters.maxPrice"
-            placeholder="Unesi maksimalnu cenu"
-            class="border p-2 rounded w-full"
-          />
-        </div>
-      </div>
-
-      <div class="mt-6 flex justify-end gap-2">
-        <button
-          @click="resetFilters"
-          class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
-        >
-          Poništi filtere
-        </button>
-        <button
-          @click="isFilterOpen = false"
-          class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
-        >
-          Zatvori
-        </button>
-        <button
-          @click="applyFilters"
-          class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-        >
-          Primeni filter
-        </button>
-      </div>
-    </div>
   </div>
 
   <section class="my-8" v-if="courses?.length">
@@ -157,15 +146,16 @@ import { useRoute, useRouter } from 'vue-router'
 import { toast } from 'vue3-toastify'
 import PurchaseCourseModal from '@/components/PurchaseCourseModal.vue'
 import { useUserStore } from '@/stores/user'
+import type { Category } from '@/types/Category'
 
 const courses = ref<Course[] | null>(null)
+const categories = ref<Category[]>([])
 const searchInput = ref('')
 const loading = ref(false)
 
 const isModalOpen = ref(false)
 const selectedCourse = ref<Course | null>(null)
 
-const isFilterOpen = ref(false)
 const filters = ref({
   categoryId: '',
   dateFrom: '',
@@ -185,7 +175,6 @@ const router = useRouter()
 const fetchCourses = async (params = {}) => {
   try {
     loading.value = true
-
     const { data } = await axios.get<Course[]>('http://localhost:3000/api/course', {
       params
     })
@@ -194,6 +183,15 @@ const fetchCourses = async (params = {}) => {
     toast.error('Greška prilikom dohvatanja kurseva')
   } finally {
     loading.value = false
+  }
+}
+
+const fetchCategories = async () => {
+  try {
+    const { data } = await axios.get<Category[]>('http://localhost:3000/api/category')
+    categories.value = data
+  } catch (err) {
+    toast.error('Greška prilikom dohvatanja kategorija')
   }
 }
 
@@ -274,9 +272,7 @@ const applyFilters = async () => {
   if (filters.value.maxPrice) params.maxPrice = Number(filters.value.maxPrice)
 
   router.replace({ query: { ...params } })
-
   await fetchCourses(params)
-  isFilterOpen.value = false
 }
 
 const resetFilters = async () => {
@@ -288,10 +284,10 @@ const resetFilters = async () => {
   }
 
   router.replace({ query: {} })
-
   await fetchCourses()
-  isFilterOpen.value = false
 }
+
+fetchCategories()
 
 watch(
   () => route.query,
