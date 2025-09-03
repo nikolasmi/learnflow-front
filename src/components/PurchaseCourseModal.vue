@@ -113,8 +113,6 @@ const submitPurchase = handleSubmit(async () => {
     }
 
     const { data } = await axios.post('http://localhost:3000/api/purchase', payload)
-
-    toast.success('Kupovina uspešna! Kurs je dodat na dashboard')
     emit('purchased', data)
     emit('close')
   } catch (error) {
